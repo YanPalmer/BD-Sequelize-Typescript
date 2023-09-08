@@ -5,7 +5,7 @@ export const sequelize = new Sequelize({
   database: "softex",
   host: "localhost",
   port: 5432,
-  username: "alcidesbezerra",
-  password: "alcidesbezerra123",
+  username: "postgres",
+  password: "root",
   logging: false,
 });
