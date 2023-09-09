@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 
+// Configurações do banco de dados postgres
 export const sequelize = new Sequelize({
   dialect: "postgres",
   database: "softex",
