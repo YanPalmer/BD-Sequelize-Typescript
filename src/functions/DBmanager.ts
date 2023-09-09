@@ -27,13 +27,16 @@ export async function DBmanager(execucao: number) {
         const buscarUsuario = async (nome: string, email: string) => {
             try {
                 const usuario = await User.findOne({
-                    where: { nome, email },
+                    where: {
+                        name: dadoNome,
+                        email: dadoEmail,
+                    },
                 });
 
                 if (usuario) {
-                    console.log(`ID: ${usuario.id}`)
-                } else {
-                    console.log("Usuárioo não encontrado.");
+                    console.log(`Resultado encontrado:`);
+                    console.log(`ID: ${usuario.dataValues.id}\nNome: ${usuario.dataValues.name}\nEmail: ${usuario.dataValues.email}
+                    `);
                 }
             } catch (error) {
                 console.error("Ocorreu um erro ao buscar o usuário:", error)
@@ -47,7 +50,7 @@ export async function DBmanager(execucao: number) {
         //         email: dadoEmail,
         //     },
         // })
-        console.log(`Resultado encontrado para: ${dadoNome + ' ' + dadoEmail}`);
+        // console.log(`Resultado encontrado para: ${dadoNome + ' ' + dadoEmail}`);
         console.log("Sincronizando...");
         setTimeout(() => {
             inicializar();
