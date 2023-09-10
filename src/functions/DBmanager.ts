@@ -9,41 +9,42 @@ export async function DBmanager(execucao: number) {
     async function inserirDados() {
         const entradaNome = String(prompt("Digite seu nome: "));
         const entradaEmail = prompt("Digite seu email: ");
-        await User.create({
-            name: entradaNome,
-            email: entradaEmail
-        });
+        try {
+            await User.create({
+                name: entradaNome,
+                email: entradaEmail
+            });
+        } catch (error) {
+            console.error("Email já existente!");
+            console.log("Digite um outro email...");
+            inserirDados();
+        }
+
         console.log(`Usuário ${entradaNome} adicionado com sucesso!`);
         console.log("Sincronizando...");
-        setTimeout(() => {
-            inicializar();
-        }, 4000);
+        reinicializar();
     }
 
     async function procurarDados() {
-        console.log("Procurar dados...")
-        const dadoNome = String(prompt("Digite o Nome: "));
+        console.log("Procurar dados...");
         const dadoEmail = String(prompt("Digite o Email: "));
-        const buscarUsuario = async (nome: string, email: string) => {
+        const buscarUsuario = async (email: string) => {
             try {
                 const usuario = await User.findOne({
                     where: {
-                        name: dadoNome,
                         email: dadoEmail,
                     },
                 });
 
                 if (usuario) {
                     console.log(`Resultado encontrado:`);
-                    console.log(`ID: ${usuario.dataValues.id}\nNome: ${usuario.dataValues.name}\nEmail: ${usuario.dataValues.email}
-                    `);
+                    console.log(`ID: ${usuario.dataValues.id}\nNome: ${usuario.dataValues.name}\nEmail: ${usuario.dataValues.email}`);
                 }
             } catch (error) {
-                console.error("Ocorreu um erro ao buscar o usuário:", error)
+                console.error("Ocorreu um erro ao buscar o usuário:", error);
             }
         }
-        await buscarUsuario(dadoNome, dadoEmail);
-
+        await buscarUsuario(dadoEmail);
         // User.findOne({
         //     where: {
         //         name: dadoNome,
@@ -52,13 +53,13 @@ export async function DBmanager(execucao: number) {
         // })
         // console.log(`Resultado encontrado para: ${dadoNome + ' ' + dadoEmail}`);
         console.log("Sincronizando...");
-        setTimeout(() => {
-            inicializar();
-        }, 4000);
+        reinicializar();
     }
 
     async function excluirDados() {
-
+        User.drop();
+        console.log(`Excluido com sucesso...`)
+        reinicializar();
     }
 
     async function mostrarTabela() {
@@ -69,10 +70,13 @@ export async function DBmanager(execucao: number) {
             const user = users[i];
             console.log(
                 user.dataValues.id,
-                user.dataValues.name,
-                user.dataValues.email
+                "Nome: ", user.dataValues.name,
+                " | ",
+                "Email: ", user.dataValues.email
             );
         }
+        console.log("Voltando ao início...");
+        reinicializar();
     }
 
     // Gerencia qual função executar de acordo com o número especificado
@@ -85,4 +89,10 @@ export async function DBmanager(execucao: number) {
     } else if (execucao == 4) {
         mostrarTabela()
     }
+}
+
+function reinicializar() {
+    setTimeout(() => {
+        inicializar();
+    }, 4000);
 }
