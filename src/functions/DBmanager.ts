@@ -9,18 +9,27 @@ export async function DBmanager(execucao: number) {
     async function inserirDados() {
         const entradaNome = String(prompt("Digite seu nome: "));
         const entradaEmail = prompt("Digite seu email: ");
-        try {
-            await User.create({
-                name: entradaNome,
+        await User.findOne({
+            where: {
                 email: entradaEmail
-            });
-        } catch (error) {
-            console.error("Email já existente!");
-            console.log("Digite um outro email...");
-            inserirDados();
-        }
-
-        console.log(`Usuário ${entradaNome} adicionado com sucesso!`);
+            }
+        })
+        .then(async (email) => {
+            // Caso não exista
+            if (!email) {
+                try {
+                    await User.create({
+                        name: entradaNome,
+                        email: entradaEmail
+                    });
+                    console.log(`Usuário ${entradaNome} adicionado com sucesso!`);
+                } catch (error) {
+                    console.error("Erro inesperado!");
+                }
+            } else {
+                console.error("Email já existente!");
+            }
+        })
         console.log("Sincronizando...");
         reinicializar();
     }
@@ -29,37 +38,34 @@ export async function DBmanager(execucao: number) {
         console.log("Procurar dados...");
         const dadoEmail = String(prompt("Digite o Email: "));
         await buscarUsuario(dadoEmail);
-        // const buscarUsuario = async (email: string) => {
-        //     try {
-        //         const usuario = await User.findOne({
-        //             where: {
-        //                 email: dadoEmail,
-        //             },
-        //         });
 
-        //         if (usuario) {
-        //             console.log(`Resultado encontrado:`);
-        //             console.log(`ID: ${usuario.dataValues.id}\nNome: ${usuario.dataValues.name}\nEmail: ${usuario.dataValues.email}`);
-        //         }
-        //     } catch (error) {
-        //         console.error("Ocorreu um erro ao buscar o usuário:", error);
-        //     }
-        // }
-        // await buscarUsuario(dadoEmail);
-        // User.findOne({
-        //     where: {
-        //         name: dadoNome,
-        //         email: dadoEmail,
-        //     },
-        // })
-        // console.log(`Resultado encontrado para: ${dadoNome + ' ' + dadoEmail}`);
         console.log("Sincronizando...");
         reinicializar();
     }
 
     async function excluirDados() {
         let email: string = prompt("Email a ser excluído: ");
-        console.log(`Excluido com sucesso...`)
+        const usuarioEncontrado = await buscarUsuario(email);
+        // console.log(usuarioEncontrado);
+
+        if (usuarioEncontrado) {
+            // console.log(usuarioEncontrado.dataValues.id);
+            let confirmacao = prompt("Deseja mesmo excluir (S/N)? ").toLowerCase();
+            if (confirmacao === "s") {
+                await User.destroy({
+                    where: {
+                        id: usuarioEncontrado.dataValues.id,
+                    },
+                })
+                .then((destruido) => console.log("Usuário excluído com sucesso!"))
+                .catch((error) => {
+                    console.error("Erro ao excluir usuário: ", error);
+                })
+            } else {
+                console.log("Operação cancelada")
+            }
+        }
+        console.log("Sincronizando...");
         reinicializar();
     }
 
@@ -108,13 +114,15 @@ const buscarUsuario = async (dadoEmail: string) => {
 
         if (!usuario) {
             throw new Error("Usuário não encontrado");
-        }
-        console.log(`Resultado encontrado:
+        } else {
+            console.log(`Resultado encontrado:
 ${"=".repeat(30)}
 ID: ${usuario.dataValues.id}
 Nome: ${usuario.dataValues.name}
 Email: ${usuario.dataValues.email}
 ${"=".repeat(30)}`);
+        }
+        return usuario;
         // console.log(`ID: ${usuario.dataValues.id}\nNome: ${usuario.dataValues.name}\nEmail: ${usuario.dataValues.email}`);
     } catch (error) {
         console.error(error);
